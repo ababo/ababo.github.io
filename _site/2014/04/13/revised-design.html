@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Toy OS: Revised design</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">Ababo's Personal Blog</a></h1>
+            <a class="extra" href="https://github.com/ababo">projects</a>
+          </div>
+
+          <h2>Toy OS: Revised design</h2>
+<p class="meta">13 Apr 2014</p>
+
+<div class="post">
+<p>Before starting to deepen in a next iteration of coding I decided to review my previous architectural design. There are my previous design points:</p>
+
+<ul>
+<li><p><strong>Single 64-bit address space.</strong> This will give ability for applications to call kernel without need to switch context and serialize data. Moreover it will shorten thread context switches and will remove need to clear TLB-cache.</p></li>
+<li><p><strong>Virtual machine for applications.</strong> It will disable applications to exceed own memory boundaries (memory protection). Virtual machine is also useful for distributed environments with several CPU architectures.</p></li>
+<li><p><strong>Storage devices are mapped to address space.</strong> RAM is just caching access to persistent storage via address space. In-use pages are loaded to RAM, and not-in-use ones are saved back to device. This is done transparently to applications. This approach makes files redundant: regularly allocated memory is already persistent, thus there is no need to save its content to files.</p></li>
+<li><p><strong>Persistent applications.</strong> They survive both system restart and moving to another machine. This is partially achieved by the previous point as well as by absence of resource descriptors (e.g. no file handles). To use any resource a unique identifier must be used instead (no need to open the resource before the actual usage). Оn the one hand this will expose some additional overhead (but not too drastic because of caching) but on the other hand this will detach such call from place and time constraints (code which is resumed after system restart or moved to another machine will be able to continue running).</p></li>
+</ul>
+
+<h2>Domains</h2>
+
+<p>Storage devices are mounted on a single 64-bit address space. Each device takes some contiguous region (let&#39;s call it <em>domain</em>). It is possible to mount a storage device on arbitrary address (in case if there is enough unoccupied place).</p>
+
+<p><img src="/files/2014-04/single-64bit-address-space.png" alt="single 64-bit address space"></p>
+
+<p>After mounting domain threads resume running. The cheapest function calls are calls inside a domain. They impose no additional overhead than regular C-functions. Inter-domain calls (including kernel calls) are not so cheap (e.g. need to handle caller/callee domain unmount during the call). Still there is no need to serialize in/out data (single address space).</p>
+
+<h2>This will not work</h2>
+
+<p>As for me the scheme above is very beautiful. Unfortunately it has a hidden defect which make it impossible. There is no simple way to make domain code <em>position independent (PIC)</em>. It&#39;s needed to enable mounting on arbitrary address (otherwise there&#39;s no guarantee that two given drives could be mounted simultaneously - their addresses could overlap).</p>
+
+<p>Yes, there are useful techniques and tricks which are widely used in shared libraries. But they don&#39;t work for living code (code which is unloaded and reloaded again). Think about allocating memory. You call <em>malloc</em> and save the returned memory address to some variable. Now the domain gets unmounted and remounted on a different address. Here the code operates absolute addresses so the techniques based on instruction pointer offsets are not working.</p>
+
+<p>The x86_64 could help us here, because of its <em>segmentation</em> capability. Indeed we could dynamically create memory segment for domain we&#39;re going to mount. All domain code addresses are absolute, starting from its beginning. They are implicitly incremented by the segment address inside CPU. But:</p>
+
+<ul>
+<li>Inter-domain calls must be performed using <em>far pointers</em> (segment + offset). Intra-domain calls should use regular <em>near pointers</em> (far pointers are expensive and bloat binary code). Two different types of pointers is not a good idea.</li>
+<li>Far pointers are not part of the C/C++ standards and not supported by the major compilers (e.g. gcc or clang).</li>
+<li>OS design based segmentation is not portable to CPU architectures other than x86.</li>
+</ul>
+
+<p><p></p>
+
+<h2>Conclusion</h2>
+
+<p>The multiple address spaces scheme is unavoidable. Persistence mechanism must be built on top of it. Each domain should occupy its own address space.</p>
+
+<p><strong>P.S.</strong> <em>I&#39;ve been reminded of lack of segmentation support in x86_64 (unlike x86), so all the far pointers stuff mentioned above is not relevant.</em></p>
+
+<p><strong>P.P.S.</strong> <em>Although x86_64 does not support full-fledged segmentation later x86_64 CPUs actually support base+offset addressing (for FS and GS segment registers).</em></p>
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Simon Prikhodko<br />
+                semion.ababo@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/ababo">github.com/ababo</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

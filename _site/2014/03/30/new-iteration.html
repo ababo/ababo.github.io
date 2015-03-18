@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Toy OS: Starting a new iteration (ver.0.4)</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">Ababo's Personal Blog</a></h1>
+            <a class="extra" href="https://github.com/ababo">projects</a>
+          </div>
+
+          <h2>Toy OS: Starting a new iteration (ver.0.4)</h2>
+<p class="meta">30 Mar 2014</p>
+
+<div class="post">
+<p>It&#39;s been 9 months since I worked last time on the previous iteration of <em>Toy OS</em> (ver.0.3). Now I feel it&#39;s time to start a next one. Let&#39;s enumerate the main accomplishments of each previous version:</p>
+
+<ul>
+<li><strong>ver.0.1</strong> - long mode booting, interrupts, memory mapping, CPU-topology</li>
+<li><strong>ver.0.2</strong> - multiboot support, SMP, thread scheduling, mutex, PCI detection</li>
+<li><strong>ver.0.3</strong> - code portability, sleep</li>
+</ul>
+
+<p>In ver.0.4 I would like to reconsider all my previous approaches from ground up. By now there are number of decisions I should remade:</p>
+
+<ul>
+<li>Should I use a modern build system (maybe, a Python-based one) instead of Make? (<em>yes</em>)</li>
+<li>Should I start supporting multiple platforms from this iteration? (<em>no</em>)</li>
+<li>Should I support UEFI2 instead of multiboot support? (<em>no</em>)</li>
+<li>Should I redesign basic architecture by adding support for multiple address spaces? (<em>no</em>)</li>
+<li>Should I use C++11 instead of C99? (<em>yes</em>)</li>
+</ul>
+
+<p>Let&#39;s review all these questions one by one.</p>
+
+<h2>Choosing a build system</h2>
+
+<p>I already thought about replacing ugly <em>GNU Make</em> with something pretty, modern and Python-based. There are two such build systems: <em>Scons</em> and <em>Waf</em>. First is more popular but the second is cleaner, faster and more pythonic. I personally prefer the second one. But both are not really suitable for osdev. They have prebuilt compile and build templates (command line parameters) which are suitable for client applications but not for kernels. This means I have to do some hacking which will demand a deeper knowledge about the chosen build system. I really was not happy with this fact (here GNU Make is more convenient!) and even wrote a little module for that (see <a href="/toy/files/2014-03/tbs.py">tbs.py</a> and <a href="/toy/files/2014-03/build.py">build.py</a>). Now I believe that handmade solution is not an option (hard to support and scale), so I&#39;ll try to deepen my Waf knowledge. Will try it again. If I will not succeed, I&#39;ll return to GNU Make.</p>
+
+<h2>Multiple platform support</h2>
+
+<p>In ver.0.3 I split all my code into platform-dependent and platform-independent parts. But such division cannot be precise enough when you have a single platform. You just cannot test your decisions. So it is important to start developing for several platforms from ground up. There are only two actual platforms to target Toy OS: <em>x86_64</em> and <em>AArch64</em>. But the second is still very recent, so I neither have stable tools nor published tutorials to start from. Unfortunately I should stick with x86_64 in this iteration.</p>
+
+<h2>UEFI2 vs. Multiboot</h2>
+
+<p>As I know that AArch64 devices will support UEFI2 as well as some newer x86_64 machines. So it seems reasonable to stick with it. On the other hand I read that GRUB2 is already ported to both x86_64&#39;s UEFI2 and AArch64. Because Multiboot specification is much simpler than UEFI2 I prefer to stay with it (at least for ver.0.4).</p>
+
+<h2>Single vs. Multiple address spaces</h2>
+
+<p>Current design implies a single address space in combination with virtual machine which will enforce memory safety for client applications. This means that unmanaged applications (as well as legacy C/C++ code) will be able to crash the whole system. For practical purposes it would be useful to support multiple address spaces to give ability to safely run ported C/C++ applications. But such support complicates simplicity of the original design (every object is identified just by its pointer, no need for serialization, fast context switches, etc.). Not now, at least not in ver.0.4.</p>
+
+<h2>C++11 vs. C99</h2>
+
+<p>No doubt that C++ is much more powerful language. Yes, it is bloated and overcomplicated, but it is well supported, has good compilers as well as the nice recent standard. I cannot avoid C++ because of existing code base which is very useful. For example I will need LLVM for my virtual machine implementation. If I cannot reject implementing C++ standard library, it&#39;s worth to employ powerful C++ features inside kernel. So I&#39;ll try to use some kind of C/C++ combination.</p>
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Simon Prikhodko<br />
+                semion.ababo@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/ababo">github.com/ababo</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

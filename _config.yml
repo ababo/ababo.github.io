@@ -1,0 +1,4 @@
+name: "Ababo's Personal Blog"
+markdown: redcarpet
+pygments: true
+baseurl: /

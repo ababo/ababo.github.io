@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Toy OS: C++11 raw strings and inline assembly</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">Ababo's Personal Blog</a></h1>
+            <a class="extra" href="https://github.com/ababo">projects</a>
+          </div>
+
+          <h2>Toy OS: C++11 raw strings and inline assembly</h2>
+<p class="meta">09 Apr 2014</p>
+
+<div class="post">
+<p>I wrote basic Waf scripts for building a kernel skeleton, ISO-image creation and running QEMU emulator. Waf is pretty convenient and intuitive. The only problem I coped with trying to link my kernel was the following error: <em>Node X is created more than once</em>. Thus I didn&#39;t succeed to use <em>cprogram</em> or <em>cxxprogram</em> for this task, so I used a generic task generator with a given rule. Will not explain this stuff with a greater detail - it&#39;s not noteworthy.</p>
+
+<p>Let me show you how did I employ C++11 raw string literals while writing inline assembly:</p>
+
+<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">namespace</span> <span class="p">{</span>
+
+<span class="n">__attribute__</span><span class="p">((</span><span class="n">used</span><span class="p">))</span>
+<span class="kt">void</span> <span class="n">BStart32</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">__asm__</span><span class="p">(</span><span class="n">R</span><span class="s">&quot;!!!(</span>
+
+<span class="p">.</span><span class="n">text</span>
+
+<span class="p">.</span><span class="n">global</span> <span class="n">__bstart32</span>
+<span class="nl">__bstart32</span><span class="p">:</span>
+
+  <span class="n">movl</span> <span class="o">%</span><span class="mi">0</span><span class="p">,</span> <span class="o">%%</span><span class="n">esp</span>
+  <span class="n">movl</span> <span class="o">%%</span><span class="n">ebx</span><span class="p">,</span> <span class="n">__multiboot_info</span>
+  <span class="n">movb</span> <span class="err">$</span><span class="mh">0xFF</span><span class="p">,</span> <span class="o">%%</span><span class="n">al</span>
+  <span class="n">outb</span> <span class="o">%%</span><span class="n">al</span><span class="p">,</span> <span class="err">$</span><span class="mh">0xA1</span>
+  <span class="n">outb</span> <span class="o">%%</span><span class="n">al</span><span class="p">,</span> <span class="err">$</span><span class="mh">0x21</span> <span class="err">#</span> <span class="n">disable</span> <span class="n">IRQs</span>
+  <span class="n">movl</span> <span class="o">%%</span><span class="n">cr4</span><span class="p">,</span> <span class="o">%%</span><span class="n">edx</span> <span class="err">#</span> <span class="n">enable</span> <span class="n">SSE</span>
+  <span class="n">orl</span> <span class="o">%</span><span class="mi">1</span><span class="p">,</span> <span class="o">%%</span><span class="n">edx</span>
+  <span class="n">movl</span> <span class="o">%%</span><span class="n">edx</span><span class="p">,</span> <span class="o">%%</span><span class="n">cr4</span>
+  <span class="n">call</span> <span class="n">__boot32</span>
+
+<span class="p">.</span><span class="n">global</span> <span class="n">__halt</span>
+<span class="nl">__halt</span><span class="p">:</span>
+
+  <span class="n">hlt</span>
+  <span class="n">jmp</span> <span class="n">__halt</span>
+
+  <span class="p">)</span><span class="o">!!!</span><span class="s">&quot; : : &quot;</span><span class="n">i</span><span class="s">&quot;(__bsp_boot_stack+kBspBootStackSize), &quot;</span><span class="n">i</span><span class="s">&quot;(CR4RegBit::kOSFXSR));</span>
+<span class="p">}</span>
+
+<span class="p">}</span></code></pre></div>
+
+<p>As you can see, the raw strings support enables me to write assembly just as I would wrote it in dedicated s-file: no semicolons, no extra quotes. Very useful.</p>
+
+<p><strong>Note:</strong> to use immediate operands in the inline assembly I wrap the code by a dummy function called <em>BStart32</em>. It&#39;s not supposed to be called and it&#39;s not visible outside the module (anonymous namespace).</p>
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Simon Prikhodko<br />
+                semion.ababo@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/ababo">github.com/ababo</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>

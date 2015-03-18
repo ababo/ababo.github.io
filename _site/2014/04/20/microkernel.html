@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Toy OS: Microkernel is all we need</title>
+        <meta name="viewport" content="width=device-width">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/css/syntax.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+
+    </head>
+    <body>
+
+        <div class="site">
+          <div class="header">
+            <h1 class="title"><a href="/">Ababo's Personal Blog</a></h1>
+            <a class="extra" href="https://github.com/ababo">projects</a>
+          </div>
+
+          <h2>Toy OS: Microkernel is all we need</h2>
+<p class="meta">20 Apr 2014</p>
+
+<div class="post">
+<p>As I wrote in the previous post I&#39;ve come to a conclusion that single address space is not an option. Each domain should occupy its own address space. In addition such design will give Toy OS potential ability to support POSIX applications. I prefer the modern <em>microkernel</em> design. So I plan to start working on microkernel soon.</p>
+
+<h2>Miscellaneous design points</h2>
+
+<p><p></p>
+
+<ul>
+<li><p><strong>L4-like microkernel.</strong> The original L4 design is very good, but I believe some design modification will be required to (e.g. to support persistence).</p></li>
+<li><p><strong>Support for small and large pages.</strong> For each address space there should be a corresponding page size. Small pages are good for tiny non-persistent processes (and maybe for kernel address space, not sure here). Large pages are good for persistent domains (they use large portions of address space so otherwise page tables will consume too big amount of non-paged RAM).</p></li>
+<li><p><strong>No third party code in kernel.</strong> The kernel should be very small and efficient. Only simple predictable algorithms. Thus there is no need for neither C++ exceptions nor standard headers.</p></li>
+</ul>
+
+</div>
+
+
+          <div class="footer">
+            <div class="contact">
+              <p>
+                Simon Prikhodko<br />
+                semion.ababo@gmail.com
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/ababo">github.com/ababo</a><br />
+              </p>
+            </div>
+          </div>
+        </div>
+
+    </body>
+</html>
