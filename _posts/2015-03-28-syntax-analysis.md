@@ -2,6 +2,9 @@
 layout: post
 title:  "My improvised study of syntax analysis (part 1)"
 ---
+
+![Artificial Intelligence](/files/2015-03/ai.jpg)
+
 Intro
 -----
 
@@ -67,7 +70,7 @@ subject_group:
 
 Let's explain the added syntax. As we can see some non-terminals have attributes. Attribute value can be immediate (a concrete value like "nominative case").
 
-Some attribute names start with an exclamation mark. This prefix means "import this attribute from the corresponded non-terminal to the outer one". For example, "predicate\_group" should import number, gender and tense attributes, but they cannot be directly defined (as immediate values) in its rules. But these attributes are defined in "predicate", so we should import them from this child non-terminal.
+Some attribute names start with an exclamation mark. This prefix means "import this attribute from the corresponded non-terminal to the outer one". For example, "predicate\_group" should export number, gender and tense attributes, but they cannot be directly defined (as immediate values) in its rules. But these attributes are defined in "predicate", so we should import them from this child non-terminal.
 
 Sometimes it's important to constrain two or more child non-terminals to have a same attribute value even if it's undefined on this level. For this purpose let's use an at sign prefix. For example, in "sentence" both "predicate\_group" and "subject\_group" should have same values of case, number and gender attributes. Constrained attribute can also be imported (in this case its name starts with an exclamation mark).
 
@@ -90,15 +93,15 @@ Attribute value assignment
 Sometimes we need to assign values to attributes latter used in our constraints. For example:
 
 ```
-- "@{number=plur}{noun case=nomn} и {noun case=nomn}"
+- "@{number=plur}{noun} и {noun}"
 ```
 
-This rule states that the number attribute of a phrase which consists of enumeration of two nouns (слон и моська) is plural. Attribute value assignment always starts from rule's very beginning and has an at sign prefix to differentiate it from non-terminal.
+This rule states that the number attribute of a phrase which consists of enumeration of two nouns (слон и моська) is plural. Attribute value assignment always starts from rule's very beginning, it has an at sign prefix and it consists of attributes with corresponded immediate values.
 
-Special terminals
+Lexical terminals
 -----------------
 
-We could define leaf non-terminals through terminals like that:
+We could define lowest-level non-terminals through terminals like that:
 
 ```
 predicate:
@@ -109,10 +112,10 @@ predicate:
 ...
 ```
 
-But this approach is impractical due to a huge number of different word forms. Such terminals should be taken from a morphological dictionary. That's why such terminals have a special syntax in the described grammar:
+But this approach is impractical due to a huge number of different word forms. Such terminals should be taken from a morphological dictionary. That's why these terminals are not listed directly but defined by set of attribute values:
 
 ```
 predicate:
-- "@{pos=verb !number !gender !tense}"
+- "{pos=verb !number !gender !tense}"
 ```
-As we can see this notation is pretty familiar except the absence of non-terminal name; there are attributes only (note: pos attribute name is just an abbreviation for "part of speech").
+As we can see this notation is pretty similar to attribute assignment but without an at sign character and without constraint to be at rule's very beginning. The rule above corresponds to terminals with "verb" value of attribute "pos" (part of speech).
