@@ -29,7 +29,7 @@
 
 <p>Let me show you how did I employ C++11 raw string literals while writing inline assembly:</p>
 
-<div class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">namespace</span> <span class="p">{</span>
+<figure class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="k">namespace</span> <span class="p">{</span>
 
 <span class="n">__attribute__</span><span class="p">((</span><span class="n">used</span><span class="p">))</span>
 <span class="kt">void</span> <span class="n">BStart32</span><span class="p">()</span> <span class="p">{</span>
@@ -59,7 +59,7 @@
   <span class="p">)</span><span class="o">!!!</span><span class="s">&quot; : : &quot;</span><span class="n">i</span><span class="s">&quot;(__bsp_boot_stack+kBspBootStackSize), &quot;</span><span class="n">i</span><span class="s">&quot;(CR4RegBit::kOSFXSR));</span>
 <span class="p">}</span>
 
-<span class="p">}</span></code></pre></div>
+<span class="p">}</span></code></pre></figure>
 
 <p>As you can see, the raw strings support enables me to write assembly just as I would wrote it in dedicated s-file: no semicolons, no extra quotes. Very useful.</p>
 
